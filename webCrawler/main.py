@@ -4,71 +4,101 @@
 # relevant web data.
 
 import requests
+import time
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 # Initialize webdriver
-web = webdriver.Chrome("C:\\Users\\Chris\\source\\chromedriver.exe")
+web = webdriver.Chrome("D:\\Chris\\source\\chromedriver.exe")
 startUrl = "https://www.indeed.com"
 web.get(startUrl)
 
-# Initialize search variables
-whatJob = "Software Developer"
-whatLocation = "Remote"
-jobExists = True
-
 # Find search fields, input search parameters, and search
-what = web.find_element_by_xpath('//*[@id="text-input-what"]')
-what.send_keys(Keys.CONTROL, "a", Keys.DELETE)
-what.send_keys(whatJob)
+def searchHomePage():
+    whatJob = "Software Developer"
+    whatLocation = "Remote"
 
-where = web.find_element_by_xpath('//*[@id="text-input-where"]')
-where.send_keys(Keys.CONTROL, "a", Keys.DELETE)
-where.send_keys(whatLocation)
+    what = web.find_element_by_xpath('//*[@id="text-input-what"]')
+    what.send_keys(Keys.CONTROL, "a", Keys.DELETE)
+    what.send_keys(whatJob)
 
-searchButton = web.find_element_by_xpath('//*[@id="whatWhereFormId"]/div[3]/button')
-searchButton.click()
+    where = web.find_element_by_xpath('//*[@id="text-input-where"]')
+    where.send_keys(Keys.CONTROL, "a", Keys.DELETE)
+    where.send_keys(whatLocation)
 
-# Check to see if job listings were found
-try:
-    checkForJobs = web.find_element_by_xpath('//*[@id="resultsCol"]/div[2]/div/h1')
-    print("No jobs found.")
-    jobExists = False
-except Exception:
-    print("Jobs found.")
-    jobExists = True
+    searchButton = web.find_element_by_xpath('//*[@id="whatWhereFormId"]/div[3]/button')
+    searchButton.click()
 
-# If job listings were found, crawl job content
-if (jobExists):
+# Retrieve current page content
+def getPageContent():
     url = web.current_url
     page = requests.get(url)
     pageContent = BeautifulSoup(page.content, "html.parser")
-    results = pageContent.find(id="resultsCol")
+    results = pageContent.find(id="resultsBody")
 
-    jobs = results.find_all("table", class_="jobCard-mainContent")
-#python_jobs = results.find_all("h2", string=lambda text: "python" in text.lower())
-#python_job_elements = [h2_element.parent.parent.parent for h2_element in python_jobs]
+# Main Function
+def main():
+    searchHomePage()
+    time.sleep(5)
 
-    for job_element in jobs:
-        job_titles = [table_element.child.child.child.child.child.child for span_element in jobs]
-        #title_element = job_element.find("h2", class_="jobTitle jobTitle-color-purple").child
-        company_element = job_element.find("h3", class_="company")
-        location_element = job_element.find("p", class_="location")
-        print(title_element.text.strip())
-        print(company_element.text.strip())
-        print(location_element.text.strip())
-        print()
-else:
-    pass
+    # Check to see if job listings were found
+    try:
+        checkForJobs = web.find_element_by_xpath('//*[@id="resultsCol"]/div[2]/div/h1')
+        print("No jobs found.\n")
+        jobExists = False
+    except Exception:
+        print("Jobs found.\n")
+        jobExists = True
 
-#for python_job_element in python_job_elements:
-#    title_element = python_job_element.find("h2", class_="title")
-#    company_element = python_job_element.find("h3", class_="company")
-#    location_element = python_job_element.find("p", class_="location")
-#    link_url = python_job_element.find_all("a")[1]["href"]
-#    print(f"Apply here: {link_url}\n")
-#    print(title_element.text.strip())
-#    print(company_element.text.strip())
-#    print(location_element.text.strip())
-#    print()
+    # If job listings were found, crawl job postings
+    if (jobExists):
+        jobTiles = web.find_elements_by_css_selector('*[class="job_seen_beacon"]')
+        print(len(jobTiles), " jobs found on page 1.\n")
+
+        for jobTile in jobTiles:
+            jobTile.click()
+            time.sleep(2)
+
+            # Switch to iframe for additional job info
+            iframe = web.find_element_by_xpath('//*[@id="vjs-container-iframe"]')
+            web.switch_to.frame(iframe)
+            time.sleep(2)
+
+            # Exception handling in case of extra images in job posting
+            try:
+                jobTitleElement = web.find_element_by_xpath('//div[1]/div[1]/h1')
+            except Exception:
+                jobTitleElement = web.find_element_by_xpath('//div[2]/div[1]/h1')
+            else:
+                pass
+            # Exception handling in case of hyperlink
+            try:
+                companyElement = web.find_element_by_xpath('//div[1]/div[2]/div/div/div[1]/div')
+            except Exception:
+                companyElement = web.find_element_by_xpath('//div[2]/div[2]/div/div/div[1]/div[1]/a')
+            else:
+                pass
+            # Exception handling for multiple xpaths
+            try:
+                locationElement = web.find_element_by_xpath('//div[1]/div[2]/div/div/div[2]')
+            except Exception:
+                locationElement = web.find_element_by_xpath('//div[2]/div[2]/div/div/div[2]')
+            else:
+                pass
+
+            print(jobTitleElement.text.strip())
+            print(companyElement.text.strip())
+            print(locationElement.text.strip())
+            print()
+
+            web.switch_to.default_content()
+    else:
+        pass
+
+    web.quit()
+
+main()

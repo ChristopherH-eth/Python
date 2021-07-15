@@ -5,6 +5,7 @@
 
 import requests
 import time
+import pageContent
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -13,7 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 # Initialize webdriver
-web = webdriver.Chrome("D:\\Chris\\source\\chromedriver.exe")
+web = webdriver.Chrome("C:\\Users\\Chris\\source\\chromedriver.exe")
 startUrl = "https://www.indeed.com"
 web.get(startUrl)
 
@@ -33,17 +34,11 @@ def searchHomePage():
     searchButton = web.find_element_by_xpath('//*[@id="whatWhereFormId"]/div[3]/button')
     searchButton.click()
 
-# Retrieve current page content
-def getPageContent():
-    url = web.current_url
-    page = requests.get(url)
-    pageContent = BeautifulSoup(page.content, "html.parser")
-    results = pageContent.find(id="resultsBody")
-
 # Main Function
 def main():
     searchHomePage()
     time.sleep(5)
+    currentPage = pageContent.getPageContent.grabPage()
 
     # Check to see if job listings were found
     try:
@@ -57,7 +52,8 @@ def main():
     # If job listings were found, crawl job postings
     if (jobExists):
         jobTiles = web.find_elements_by_css_selector('*[class="job_seen_beacon"]')
-        print(len(jobTiles), " jobs found on page 1.\n")
+        jobsPage = currentPage.find(id, "searchCountPages")
+        print(len(jobTiles), " jobs found on page " + jobsPage + ".\n")
 
         for jobTile in jobTiles:
             jobTile.click()

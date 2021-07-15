@@ -1,11 +1,13 @@
-# Indeed Web Scraper Application v1.0
-# Author: Christopher Hardy
-# Description: Utilizes selenium webdriver in conjunction with chromedriver and beautiful soup to scrape 
-# relevant web data.
+'''
+Indeed Web Scraper Application v1.0
+Author: Christopher Hardy
+Description: Utilizes selenium webdriver in conjunction with chromedriver and beautiful soup to scrape
+relevant web data.
+'''
 
 import requests
 import time
-import pageContent
+import jobsFileCreator
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -13,13 +15,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+# Globals
+jfc = jobsFileCreator
+
 # Initialize webdriver
-web = webdriver.Chrome("C:\\Users\\Chris\\source\\chromedriver.exe")
+web = webdriver.Chrome("D:\\Chris\\source\\chromedriver.exe")
 startUrl = "https://www.indeed.com"
 web.get(startUrl)
 
 # Find search fields, input search parameters, and search
-def searchHomePage():
+def search_home_page():
     whatJob = "Software Developer"
     whatLocation = "Remote"
 
@@ -34,11 +39,19 @@ def searchHomePage():
     searchButton = web.find_element_by_xpath('//*[@id="whatWhereFormId"]/div[3]/button')
     searchButton.click()
 
+# Retrieve current page content
+def get_page_content():
+    url = web.current_url
+    page = requests.get(url)
+    pageContent = BeautifulSoup(page.content, "html.parser")
+    results = pageContent.find(id="resultsBody")
+    return results
+
 # Main Function
 def main():
-    searchHomePage()
+    search_home_page()
     time.sleep(5)
-    currentPage = pageContent.getPageContent.grabPage()
+    results = get_page_content()
 
     # Check to see if job listings were found
     try:
@@ -46,17 +59,16 @@ def main():
         print("No jobs found.\n")
         jobExists = False
     except Exception:
-        print("Jobs found.\n")
         jobExists = True
 
     # If job listings were found, crawl job postings
     if (jobExists):
-        jobTiles = web.find_elements_by_css_selector('*[class="job_seen_beacon"]')
-        jobsPage = currentPage.find(id, "searchCountPages")
-        print(len(jobTiles), " jobs found on page " + jobsPage + ".\n")
+        jobBoxes = web.find_elements_by_css_selector('*[class="job_seen_beacon"]')
+        jobsPage = results.find("div", id="searchCountPages")
+        print(len(jobBoxes), "Jobs Found on " + jobsPage.text.strip()[0:6] + ".\n")
 
-        for jobTile in jobTiles:
-            jobTile.click()
+        for jobBox in jobBoxes:
+            jobBox.click()
             time.sleep(2)
 
             # Switch to iframe for additional job info
@@ -86,10 +98,16 @@ def main():
             else:
                 pass
 
+            # Send job text to be written to csv file
+            jfc.jobTitle = jobTitleElement.text.strip()
+            jfc.companyName = companyElement.text.strip()
+            jfc.jobLocation = locationElement.text.strip()
             print(jobTitleElement.text.strip())
             print(companyElement.text.strip())
             print(locationElement.text.strip())
             print()
+
+            jfc.file_io()
 
             web.switch_to.default_content()
     else:

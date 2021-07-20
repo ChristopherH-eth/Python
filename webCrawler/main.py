@@ -21,7 +21,8 @@ jfc = jobsfilecreator
 pc = pagecontrols
 
 # Initialize webdriver
-web = webdriver.Chrome("C:\\Users\\Chris\\source\\chromedriver.exe")
+# Change "web" to local path
+web = webdriver.Chrome("D:\\Chris\\source\\chromedriver.exe")
 pc.web = web
 startUrl = "https://www.indeed.com"
 web.get(startUrl)

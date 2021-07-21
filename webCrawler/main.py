@@ -9,6 +9,7 @@ import requests
 import time
 import jobsfilecreator
 import pagecontrols
+import io
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -22,7 +23,7 @@ pc = pagecontrols
 
 # Initialize webdriver
 # Change "web" to local path
-web = webdriver.Chrome("D:\\Chris\\source\\chromedriver.exe")
+web = webdriver.Chrome("C:\\Users\\Chris\\source\\chromedriver.exe")
 pc.web = web
 startUrl = "https://www.indeed.com"
 web.get(startUrl)

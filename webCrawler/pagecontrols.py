@@ -11,16 +11,16 @@ web = ""
 
 # Find search fields, input search parameters, and search
 def search_home_page():
-    whatJob = "Software Developer"
-    whatLocation = "Remote"
+    jobType = "Software Developer"
+    jobLocation = "Remote"
 
     what = web.find_element_by_xpath('//*[@id="text-input-what"]')
     what.send_keys(Keys.CONTROL, "a", Keys.DELETE)
-    what.send_keys(whatJob)
+    what.send_keys(jobType)
 
     where = web.find_element_by_xpath('//*[@id="text-input-where"]')
     where.send_keys(Keys.CONTROL, "a", Keys.DELETE)
-    where.send_keys(whatLocation)
+    where.send_keys(jobLocation)
 
     searchButton = web.find_element_by_xpath('//*[@id="whatWhereFormId"]/div[3]/button')
     searchButton.click()

@@ -10,7 +10,7 @@ from datetime import date
 today = date.today()
 today_ = today.strftime("%d-%m-%Y")
 # Change "path" to local path
-path = "D:\\Chris\\source\\repos\\Python\\webCrawler\\"
+path = "C:\\Users\\Chris\\source\\repos\\Python\\webCrawler\\"
 fileName = path + "jobs_from_" + today_ + ".csv"
 
 jobTitle = ""

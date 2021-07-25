@@ -1,5 +1,5 @@
 '''
-jobsfilecreator.py is used for file I/O controls
+jobsfilecreator.py is used for jobs file I/O controls
 '''
 
 import os

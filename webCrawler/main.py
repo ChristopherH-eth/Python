@@ -5,12 +5,10 @@ Description: Utilizes selenium webdriver in conjunction with chromedriver and be
 relevant web data.
 '''
 
-import requests
 import time
 import jobsfilecreator
 import pagecontrols
-import io
-from bs4 import BeautifulSoup
+import jobreader
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -20,6 +18,7 @@ from selenium.webdriver.common.by import By
 # Globals
 jfc = jobsfilecreator
 pc = pagecontrols
+jr = jobreader
 
 # Initialize webdriver
 # Change "web" to local path
@@ -30,10 +29,11 @@ web.get(startUrl)
 
 # Main Function
 def main():
-    # Create job file if needed, search first page, and wait for search to complete
+    # Get user input, create job file if needed, search first page, and wait for search to complete
+    jr.get_data()
     jfc.create_file()
     pc.search_home_page()
-    time.sleep(5)
+    time.sleep(3)
     results = pc.get_page_content()
 
     # Check to see if job listings were found
@@ -54,10 +54,10 @@ def main():
         for jobBox in jobBoxes:
             # Check for popup
             try:
-                popupObj = web.switch_to.alert()
-                popupMsg = web.find_element_by_xpath('//*[@id="popover-heading-what"]')
-                print("Encountered a popup with the following message: " + popupMsg)
-                popupObj.dismiss()
+                emailPopup = web.find_element_by_xpath('//*[@id="popover-email"]')
+                emailPopup.send_keys(Keys.ESCAPE)
+                print("Popup detected.")
+                time.sleep(1)
             except Exception:
                 pass
 
